@@ -32,6 +32,22 @@ npm start -- -p 3100        # hoặc: pm2 start npm --name qlhd -- start -- -p 3
 ```
 Nếu chạy qua HTTP (không HTTPS) thì đặt `INSECURE_COOKIE=1` để cookie đăng nhập hoạt động.
 
+## Chạy local với database dev riêng
+Local **không** dùng database production. Có 2 database Neon:
+- `qlhd-db` – production (biến `DATABASE_URL`)
+- `qlhd-dev-db` – chỉ cho dev (biến `DEV_DATABASE_URL`, chỉ gắn môi trường Development)
+
+```bash
+npx vercel env pull .env.local        # lấy biến về máy
+node scripts/dev-env.mjs              # tạo .env.development.local trỏ DB dev, file lưu ./data/uploads
+npm run dev -- -p 3100
+```
+Khởi tạo DB dev (bảng + tài khoản mật khẩu `123456` + dữ liệu mẫu):
+```bash
+SEED_PASSWORD=123456 node --env-file=.env.development.local scripts/neon-setup.mjs
+npx tsx --env-file=.env.development.local prisma/seed-samples.ts
+```
+
 ## Deploy (Vercel + Neon + Vercel Blob)
 - Production: https://qlhd-blond.vercel.app – mỗi lần push lên `main` Vercel tự build & deploy.
 - Neon (Postgres) và Blob được gắn qua Vercel Marketplace → biến `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `BLOB_READ_WRITE_TOKEN` tự có. `AUTH_SECRET` đặt tay trong Vercel.

@@ -2,7 +2,7 @@
 // kèm PDF tiếng Việt (hợp đồng, phụ lục, BB nghiệm thu, thanh lý, hoá đơn).
 // Chạy: npx tsx --env-file=.env prisma/seed-samples.ts          (bỏ qua hợp đồng đã có)
 //       npx tsx --env-file=.env prisma/seed-samples.ts --reset  (xoá dữ liệu mẫu cũ rồi tạo lại)
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../src/lib/db";
 import { PDFDocument, rgb, type PDFFont, type PDFPage } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 import fs from "fs/promises";
@@ -10,7 +10,7 @@ import path from "path";
 import crypto from "crypto";
 import { saveObject, deleteObject } from "../src/lib/storage";
 
-const prisma = new PrismaClient();
+
 const FONT_DIR = process.env.FONT_DIR || "C:/Windows/Fonts";
 const BY = "Dữ liệu mẫu";
 
