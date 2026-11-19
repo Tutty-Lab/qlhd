@@ -32,6 +32,16 @@ npm start -- -p 3100        # hoặc: pm2 start npm --name qlhd -- start -- -p 3
 ```
 Nếu chạy qua HTTP (không HTTPS) thì đặt `INSECURE_COOKIE=1` để cookie đăng nhập hoạt động.
 
+## Deploy (Vercel + Neon + Vercel Blob)
+- Production: https://qlhd-blond.vercel.app – mỗi lần push lên `main` Vercel tự build & deploy.
+- Neon (Postgres) và Blob được gắn qua Vercel Marketplace → biến `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `BLOB_READ_WRITE_TOKEN` tự có. `AUTH_SECRET` đặt tay trong Vercel.
+- Lấy env về máy: `npx vercel env pull .env.local`
+- Khởi tạo bảng + tài khoản trên Neon (chạy qua HTTPS, dùng được cả khi mạng chặn cổng 5432):
+  `node --env-file=.env.local scripts/neon-setup.mjs`
+- Đổi schema: sửa `prisma/schema.prisma`, sinh lại `prisma/sql/init.sql` (lệnh ở đầu `scripts/neon-setup.mjs`) hoặc chạy `npx prisma db push` nếu mạng mở cổng 5432.
+- File lưu ở Vercel Blob, chỉ tải được qua `/api/files/[id]` sau khi đăng nhập. Đặt `BLOB_ACCESS=private` khi dùng store private (khuyến nghị).
+- Giới hạn upload trên Vercel: ~4MB/file (giới hạn body của serverless function).
+
 ## Dữ liệu
 - Database: `prisma/dev.db` (đổi bằng `DATABASE_URL` trong `.env`)
 - File upload: `data/uploads/` (đổi bằng `UPLOAD_DIR`)
