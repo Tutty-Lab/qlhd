@@ -10,7 +10,7 @@ const optNum = z.union([z.number(), z.string()]).optional().nullable()
   .refine((v) => v == null || (Number.isFinite(v) && v >= 0), "Số không hợp lệ");
 
 export const contractSchema = z.object({
-  company: z.any().transform(() => COMPANY.code),
+  company: z.unknown().optional().transform(() => COMPANY.code),
   extra: z.record(z.string(), z.string().max(2000)).optional().nullable()
     .transform((v) => {
       const clean = Object.fromEntries(Object.entries(v || {}).map(([k, x]) => [k, x.trim()]).filter(([, x]) => x));
