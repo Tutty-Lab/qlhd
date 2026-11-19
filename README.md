@@ -1,0 +1,54 @@
+# QLHD – Quản lý hợp đồng
+
+Next.js 15 (App Router) · shadcn/ui · Tailwind v4 · Prisma (SQLite) · JWT cookie (jose).
+
+## Cài đặt lần đầu
+```bash
+npm install
+npm run setup        # tạo database + tài khoản mặc định
+npm run dev -- -p 3100
+```
+Mở http://localhost:3100
+
+Dữ liệu mẫu (8 hợp đồng + file PDF hợp đồng / phụ lục / BB nghiệm thu / thanh lý / hoá đơn, dùng font Arial của Windows):
+```bash
+npx tsx --env-file=.env prisma/seed-samples.ts            # thêm mẫu
+npx tsx --env-file=.env prisma/seed-samples.ts --reset    # xoá mẫu cũ, tạo lại
+```
+Xoá dữ liệu mẫu: lọc người tạo "Dữ liệu mẫu" rồi xoá bằng tài khoản admin, hoặc xoá `prisma/dev.db` + `data/` rồi chạy lại `npm run setup`.
+
+Tài khoản mặc định (mật khẩu `123456`, đổi ở menu tài khoản cuối sidebar):
+
+| Tài khoản | Vai trò | Quyền |
+|---|---|---|
+| admin | Quản trị | Tất cả, kể cả xoá hợp đồng / file |
+| nhanvien | Nhập liệu | Thêm, sửa, tải file, đổi trạng thái |
+| xem | Chỉ xem | Xem, tải file |
+
+## Chạy production (VPS)
+```bash
+npm run build
+npm start -- -p 3100        # hoặc: pm2 start npm --name qlhd -- start -- -p 3100
+```
+Nếu chạy qua HTTP (không HTTPS) thì đặt `INSECURE_COOKIE=1` để cookie đăng nhập hoạt động.
+
+## Dữ liệu
+- Database: `prisma/dev.db` (đổi bằng `DATABASE_URL` trong `.env`)
+- File upload: `data/uploads/` (đổi bằng `UPLOAD_DIR`)
+- Sao lưu = copy `prisma/dev.db` + thư mục `data/`.
+- `.env` chứa `AUTH_SECRET` – không commit, mỗi máy tự tạo.
+
+## Danh mục & trường riêng theo loại hợp đồng
+Sửa trong `src/lib/constants.ts`:
+- `COMPANY` – tên công ty (CÔNG TY TNHH TUTTYLAB)
+- `CONTRACT_TYPES`, `DIRECTIONS`, `DOC_TYPES`, `EXPIRING_DAYS`
+- `TYPE_FIELDS` – các ô thông tin riêng cho từng loại (thuê: diện tích, tiền cọc…; lao động: vị trí, lương…). Thêm/bớt trường ở đây, không cần đổi database (lưu trong cột `extra` dạng JSON).
+
+## Cấu trúc
+- `src/app/(app)/` – admin panel có sidebar: Tổng quan `/`, Hợp đồng `/contracts`, chi tiết `/contracts/[id]`, Tài liệu `/documents`, Đối tác `/partners`
+- `src/app/api/` – API: auth, contracts, files
+- `src/components/` – app-sidebar, dashboard, contract-list, contract-detail, contract-form, document-list, partner-list, file-drop
+- `prisma/schema.prisma` – User, Contract, ContractFile, History
+
+## Giai đoạn 2 (chưa làm)
+Soạn hợp đồng / biên bản nghiệm thu từ template, đợt thanh toán, đánh số tự động, in A4.

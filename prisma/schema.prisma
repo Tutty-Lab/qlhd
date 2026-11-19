@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  name      String
+  role      String   @default("editor") // admin | editor | viewer
+  password  String
+  createdAt DateTime @default(now())
+}
+
+model Contract {
+  id             String         @id @default(cuid())
+  company        String         @default("TUTTYLAB")
+  contractNo     String
+  title          String?
+  type           String
+  direction      String
+  partner        String
+  partnerTax     String?
+  partnerRep     String?
+  partnerAddress String?
+  signDate       DateTime?
+  startDate      DateTime?
+  endDate        DateTime?
+  value          Float?
+  vat            Float?
+  owner          String?
+  note           String?
+  tags           String?        // phân tách bằng dấu phẩy
+  extra          String?        // JSON: trường riêng theo loại hợp đồng
+  status         String         @default("ACTIVE") // ACTIVE | DONE | CANCEL (SOON/EXPIRED tự tính)
+  createdBy      String
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  files          ContractFile[]
+  history        History[]
+
+  @@unique([company, contractNo])
+}
+
+model ContractFile {
+  id         String   @id @default(cuid())
+  contractId String
+  contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  name       String
+  stored     String
+  mime       String
+  size       Int
+  docType    String
+  note       String?
+  uploadedBy String
+  createdAt  DateTime @default(now())
+}
+
+model History {
+  id         String   @id @default(cuid())
+  contractId String
+  contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  action     String
+  note       String?
+  by         String
+  at         DateTime @default(now())
+}
