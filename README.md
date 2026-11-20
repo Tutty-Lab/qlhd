@@ -49,7 +49,9 @@ npx tsx --env-file=.env.development.local prisma/seed-samples.ts
 ```
 
 ## Deploy (Vercel + Neon + Vercel Blob)
-- Production: https://qlhd-blond.vercel.app – mỗi lần push lên `main` Vercel tự build & deploy.
+- Production: https://qlhd-blond.vercel.app – mỗi lần push lên `main` Vercel tự build & deploy. Function chạy ở Singapore (`vercel.json` → `sin1`).
+- Database production: Neon `qlhd-db-sg` (Singapore, biến `SG_DATABASE_URL`, ưu tiên hơn `DATABASE_URL` trong `src/lib/db.ts`). `qlhd-db` (Mỹ) là bản cũ, chỉ để dự phòng.
+- Tìm kiếm không dấu cần extension `unaccent` (`CREATE EXTENSION IF NOT EXISTS unaccent`).
 - Neon (Postgres) và Blob được gắn qua Vercel Marketplace → biến `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `BLOB_READ_WRITE_TOKEN` tự có. `AUTH_SECRET` đặt tay trong Vercel.
 - Lấy env về máy: `npx vercel env pull .env.local`
 - Khởi tạo bảng + tài khoản trên Neon (chạy qua HTTPS, dùng được cả khi mạng chặn cổng 5432):
