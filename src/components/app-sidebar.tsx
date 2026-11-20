@@ -7,13 +7,13 @@ import {
   Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { COMPANY, DOC_TYPES, ROLE_LABEL } from "@/lib/constants";
+import { DOC_TYPES } from "@/lib/constants";
 import { api, jsonInit } from "@/lib/format";
 import { Building2, ChevronsUpDown, ClipboardCheck, FileStack, FileText, KeyRound, LayoutDashboard, LogOut, Plus, ShieldCheck, Users } from "lucide-react";
 
@@ -24,7 +24,7 @@ const NAV = [
   { href: "/partners", label: "Đối tác", icon: Users },
 ];
 
-export function AppSidebar({ name, role, canEdit }: { name: string; role: string; canEdit: boolean }) {
+export function AppSidebar({ name, canEdit }: { name: string; role: string; canEdit: boolean }) {
   const path = usePathname();
   const active = (href: string) => (href === "/" ? path === "/" : path.startsWith(href));
   const [pwOpen, setPwOpen] = useState(false);
@@ -108,14 +108,11 @@ export function AppSidebar({ name, role, canEdit }: { name: string; role: string
                   <Avatar className="size-8 rounded-lg"><AvatarFallback className="rounded-lg">{name.trim().charAt(0).toUpperCase()}</AvatarFallback></Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-medium">{name}</span>
-                    <span className="truncate text-xs text-muted-foreground">{ROLE_LABEL[role]}</span>
                   </div>
                   <ChevronsUpDown className="ml-auto size-4" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent side="right" align="end" className="min-w-56">
-                <DropdownMenuLabel className="font-normal"><div className="font-medium">{name}</div><div className="text-xs text-muted-foreground">{COMPANY.name}</div></DropdownMenuLabel>
-                <DropdownMenuSeparator />
                 <DropdownMenuItem onSelect={() => setPwOpen(true)}><KeyRound /> Đổi mật khẩu</DropdownMenuItem>
                 <DropdownMenuItem onSelect={logout}><LogOut /> Đăng xuất</DropdownMenuItem>
               </DropdownMenuContent>

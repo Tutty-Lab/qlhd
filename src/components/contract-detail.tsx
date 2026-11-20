@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -16,7 +15,7 @@ import { ContractForm } from "./contract-form";
 import { FileDrop, toFormData, type PendingFile } from "./file-drop";
 import { DOC_TYPES, TYPE_FIELDS } from "@/lib/constants";
 import { api, fmtDate, fmtDateTime, fmtMoney, fmtCur, fmtSize, jsonInit, parseExtra, type ContractDetail, type ContractFile } from "@/lib/format";
-import { ArrowLeft, Download, Eye, FileImage, FileText, Loader2, MoreHorizontal, Pencil, ShieldCheck, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, Download, Eye, FileImage, Filter, FileText, Loader2, MoreHorizontal, Pencil, ShieldCheck, Trash2, Upload } from "lucide-react";
 import { NdaDialog } from "./nda-dialog";
 import { FilePreview } from "./file-preview";
 
@@ -83,7 +82,6 @@ export function ContractDetailView({ id, canEdit, canDelete }: { id: string; can
         <Button variant="ghost" size="icon" asChild><Link href="/contracts"><ArrowLeft /></Link></Button>
         <div className="mr-auto">
           <div className="flex items-center gap-2"><h1 className="text-xl font-semibold">{c.contractNo}</h1><StatusBadge status={c.status} endDate={c.endDate} /></div>
-          <div className="text-sm text-muted-foreground">{c.title || c.partner}</div>
         </div>
         {canEdit && <>
           <Button variant="outline" onClick={() => setEditOpen(true)}><Pencil /> Sửa</Button>
@@ -108,13 +106,15 @@ export function ContractDetailView({ id, canEdit, canDelete }: { id: string; can
 
       <div className="grid xl:grid-cols-[minmax(0,1fr)_360px] gap-4 items-start">
         <Card className="gap-0 p-0 overflow-hidden">
-          <div className="p-4 border-b overflow-x-auto">
-            <Tabs value={tab} onValueChange={setTab}>
-              <TabsList>
-                <TabsTrigger value={ALL}>Tất cả ({c.files.length})</TabsTrigger>
-                {DOC_TYPES.map((t) => <TabsTrigger key={t} value={t}>{t}{counts[t] ? ` (${counts[t]})` : ""}</TabsTrigger>)}
-              </TabsList>
-            </Tabs>
+          <div className="p-3 border-b flex items-center gap-2">
+            <span className="text-sm font-semibold mr-auto">Tài liệu</span>
+            <Select value={tab} onValueChange={setTab}>
+              <SelectTrigger className="h-9 w-[230px] bg-white"><Filter className="size-4 text-muted-foreground" /><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>Tất cả loại ({c.files.length})</SelectItem>
+                {DOC_TYPES.map((t) => <SelectItem key={t} value={t}>{t} ({counts[t] || 0})</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
           {!files.length ? (
             <div className="py-16 text-center text-muted-foreground text-sm">

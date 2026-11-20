@@ -62,7 +62,7 @@ export function DocumentList({ canEdit }: { canEdit: boolean }) {
           <Table>
             <TableHeader><TableRow>
               <TableHead>Tên file</TableHead><TableHead>Loại</TableHead><TableHead>Hợp đồng</TableHead>
-              <TableHead>Người tải</TableHead><TableHead>Thời gian</TableHead><TableHead className="text-right">Thao tác</TableHead>
+              <TableHead>Thời gian</TableHead><TableHead className="text-right">Thao tác</TableHead>
             </TableRow></TableHeader>
             <TableBody>
               {!res && Array.from({ length: 5 }).map((_, i) => <TableRow key={i}><TableCell colSpan={6}><Skeleton className="h-6" /></TableCell></TableRow>)}
@@ -81,7 +81,6 @@ export function DocumentList({ canEdit }: { canEdit: boolean }) {
                     <Link href={`/contracts/${f.contract.id}`} className="font-medium hover:underline">{f.contract.contractNo}</Link>
                     <div className="text-xs text-muted-foreground truncate max-w-[240px]">{f.contract.partner}</div>
                   </TableCell>
-                  <TableCell>{f.uploadedBy}</TableCell>
                   <TableCell className="whitespace-nowrap">{fmtDateTime(f.createdAt)}</TableCell>
                   <TableCell className="text-right whitespace-nowrap">
                     <Button variant="ghost" size="icon-sm" title="Xem" onClick={() => setPreview(f)}><Eye /></Button>
