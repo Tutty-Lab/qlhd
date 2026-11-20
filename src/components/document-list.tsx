@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Card } from "@/components/ui/card";
@@ -9,25 +9,36 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DOC_TYPES } from "@/lib/constants";
-import { api, fmtDateTime, fmtSize, noAccent, type DocumentRow } from "@/lib/format";
+import { api, fmtDateTime, fmtSize, type DocumentRow } from "@/lib/format";
 import { Download, Eye, FileImage, FileText, Search } from "lucide-react";
 
 const ALL = "__all";
+const PAGE = 50;
+type DocumentPage = { items: DocumentRow[]; total: number; counts: Record<string, number>; all: number; loading?: boolean };
+const EMPTY: DocumentPage = { items: [], total: 0, counts: {}, all: 0 };
 
 export function DocumentList() {
   const params = useSearchParams();
-  const [docs, setDocs] = useState<DocumentRow[] | null>(null);
+  const [res, setRes] = useState<DocumentPage | null>(null);
   const [tab, setTab] = useState(params.get("type") || ALL);
   const [q, setQ] = useState("");
-  useEffect(() => { api<DocumentRow[]>("/api/documents").then(setDocs).catch(() => setDocs([])); }, []);
-  useEffect(() => { setTab(params.get("type") || ALL); }, [params]);
+  const [dq, setDq] = useState("");
+  const [page, setPage] = useState(1);
+  useEffect(() => { setTab(params.get("type") || ALL); setPage(1); }, [params]);
+  useEffect(() => { const t = setTimeout(() => { setDq(q.trim()); setPage(1); }, 300); return () => clearTimeout(t); }, [q]);
+  useEffect(() => {
+    const ctl = new AbortController();
+    const sp = new URLSearchParams({ page: String(page), limit: String(PAGE) });
+    if (tab !== ALL) sp.set("type", tab);
+    if (dq) sp.set("q", dq);
+    setRes((r) => (r ? { ...r, loading: true } : r));
+    api<DocumentPage>("/api/documents?" + sp, { signal: ctl.signal }).then(setRes).catch((e) => { if (e?.name !== "AbortError") setRes(EMPTY); });
+    return () => ctl.abort();
+  }, [tab, dq, page]);
 
-  const list = useMemo(() => {
-    const nq = noAccent(q.trim());
-    return (docs || []).filter((f) => (tab === ALL || f.docType === tab) &&
-      (!nq || noAccent([f.name, f.contract.contractNo, f.contract.partner].join(" ")).includes(nq)));
-  }, [docs, tab, q]);
-  const count = (t: string) => (docs || []).filter((f) => f.docType === t).length;
+  const list = res?.items || [];
+  const pages = res ? Math.max(1, Math.ceil(res.total / PAGE)) : 1;
+  const count = (t: string) => res?.counts[t] ?? 0;
 
   return (
     <div className="space-y-4">
@@ -42,9 +53,9 @@ export function DocumentList() {
             <Input value={q} onChange={(e) => setQ(e.target.value)} className="pl-9 h-9" placeholder="Tìm tên file, số hợp đồng, đối tác..." />
           </div>
           <div className="overflow-x-auto">
-            <Tabs value={tab} onValueChange={setTab}>
+            <Tabs value={tab} onValueChange={(v) => { setTab(v); setPage(1); }}>
               <TabsList>
-                <TabsTrigger value={ALL}>Tất cả ({docs?.length ?? 0})</TabsTrigger>
+                <TabsTrigger value={ALL}>Tất cả ({res?.all ?? 0})</TabsTrigger>
                 {DOC_TYPES.map((t) => <TabsTrigger key={t} value={t}>{t} ({count(t)})</TabsTrigger>)}
               </TabsList>
             </Tabs>
@@ -57,8 +68,8 @@ export function DocumentList() {
               <TableHead>Người tải</TableHead><TableHead>Thời gian</TableHead><TableHead className="text-right">Thao tác</TableHead>
             </TableRow></TableHeader>
             <TableBody>
-              {!docs && Array.from({ length: 5 }).map((_, i) => <TableRow key={i}><TableCell colSpan={6}><Skeleton className="h-6" /></TableCell></TableRow>)}
-              {docs && !list.length && <TableRow><TableCell colSpan={6} className="text-center py-12 text-muted-foreground">Không có tài liệu</TableCell></TableRow>}
+              {!res && Array.from({ length: 5 }).map((_, i) => <TableRow key={i}><TableCell colSpan={6}><Skeleton className="h-6" /></TableCell></TableRow>)}
+              {res && !list.length && <TableRow><TableCell colSpan={6} className="text-center py-12 text-muted-foreground">Không có tài liệu</TableCell></TableRow>}
               {list.map((f) => (
                 <TableRow key={f.id}>
                   <TableCell className="max-w-[360px]">
@@ -84,7 +95,16 @@ export function DocumentList() {
             </TableBody>
           </Table>
         </div>
-        <div className="px-4 py-3 border-t text-sm text-muted-foreground">{list.length} tài liệu</div>
+        <div className={`px-4 py-3 border-t text-sm text-muted-foreground flex items-center justify-between gap-2 ${res?.loading ? "opacity-60" : ""}`}>
+          <span>{res?.total ?? 0} tài liệu</span>
+          {pages > 1 && (
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>Trước</Button>
+              <span className="tabular-nums">{page}/{pages}</span>
+              <Button variant="outline" size="sm" disabled={page >= pages} onClick={() => setPage(page + 1)}>Sau</Button>
+            </div>
+          )}
+        </div>
       </Card>
     </div>
   );

@@ -1,6 +1,11 @@
 export const COMPANY = {
   code: "TUTTYLAB",
   name: "CÔNG TY TNHH TUTTYLAB",
+  taxCode: "0319610602",
+  address: "Tầng 3 tòa nhà VietPhone Building, 320 Lê Quang Định, Phường Bình Lợi Trung, TP. Hồ Chí Minh, Việt Nam",
+  phone: "0387803007",
+  rep: "PHẠM HOÀNG HẢI",
+  repTitle: "Giám đốc",
 };
 
 export const CONTRACT_TYPES = [

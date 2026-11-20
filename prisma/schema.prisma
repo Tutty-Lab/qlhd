@@ -46,6 +46,7 @@ model Contract {
   history        History[]
 
   @@unique([company, contractNo])
+  @@index([createdAt])
 }
 
 model ContractFile {
@@ -60,6 +61,10 @@ model ContractFile {
   note       String?
   uploadedBy String
   createdAt  DateTime @default(now())
+
+  @@index([contractId])
+  @@index([docType, createdAt])
+  @@index([createdAt])
 }
 
 model History {
@@ -70,4 +75,6 @@ model History {
   note       String?
   by         String
   at         DateTime @default(now())
+
+  @@index([contractId, at])
 }

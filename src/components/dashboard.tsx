@@ -16,7 +16,7 @@ export function Dashboard() {
   const [docs, setDocs] = useState<DocumentRow[] | null>(null);
   useEffect(() => {
     api<ContractRow[]>("/api/contracts").then(setRows).catch(() => setRows([]));
-    api<DocumentRow[]>("/api/documents").then(setDocs).catch(() => setDocs([]));
+    api<{ items: DocumentRow[] }>("/api/documents?limit=6").then((r) => setDocs(r.items)).catch(() => setDocs([]));
   }, []);
 
   const d = useMemo(() => {

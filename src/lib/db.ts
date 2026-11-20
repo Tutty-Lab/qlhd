@@ -5,7 +5,8 @@ import ws from "ws";
 
 // Neon: kết nối qua WebSocket (cổng 443) thay vì TCP 5432 → chạy được cả khi mạng chặn cổng Postgres.
 function create() {
-  const url = process.env.DATABASE_URL || "";
+  // SG_DATABASE_URL: Neon Singapore (production), gần người dùng VN hơn us-east
+  const url = process.env.SG_DATABASE_URL || process.env.DATABASE_URL || "";
   if (url.includes("neon.tech")) {
     neonConfig.webSocketConstructor = ws;
     return new PrismaClient({ adapter: new PrismaNeon({ connectionString: url }) });

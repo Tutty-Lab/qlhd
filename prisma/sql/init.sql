@@ -75,7 +75,22 @@ CREATE TABLE "History" (
 CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 
 -- CreateIndex
+CREATE INDEX "Contract_createdAt_idx" ON "Contract"("createdAt");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Contract_company_contractNo_key" ON "Contract"("company", "contractNo");
+
+-- CreateIndex
+CREATE INDEX "ContractFile_contractId_idx" ON "ContractFile"("contractId");
+
+-- CreateIndex
+CREATE INDEX "ContractFile_docType_createdAt_idx" ON "ContractFile"("docType", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "ContractFile_createdAt_idx" ON "ContractFile"("createdAt");
+
+-- CreateIndex
+CREATE INDEX "History_contractId_at_idx" ON "History"("contractId", "at");
 
 -- AddForeignKey
 ALTER TABLE "ContractFile" ADD CONSTRAINT "ContractFile_contractId_fkey" FOREIGN KEY ("contractId") REFERENCES "Contract"("id") ON DELETE CASCADE ON UPDATE CASCADE;

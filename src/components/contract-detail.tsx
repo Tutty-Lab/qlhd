@@ -16,7 +16,8 @@ import { ContractForm } from "./contract-form";
 import { FileDrop, toFormData, type PendingFile } from "./file-drop";
 import { DOC_TYPES, TYPE_FIELDS } from "@/lib/constants";
 import { api, fmtDate, fmtDateTime, fmtMoney, fmtCur, fmtSize, jsonInit, parseExtra, type ContractDetail, type ContractFile } from "@/lib/format";
-import { ArrowLeft, Download, Eye, FileImage, FileText, Loader2, MoreHorizontal, Pencil, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, Download, Eye, FileImage, FileText, Loader2, MoreHorizontal, Pencil, ShieldCheck, Trash2, Upload } from "lucide-react";
+import { NdaDialog } from "./nda-dialog";
 
 const ALL = "__all";
 const isPreviewable = (m: string) => m === "application/pdf" || m.startsWith("image/");
@@ -29,6 +30,7 @@ export function ContractDetailView({ id, canEdit, canDelete }: { id: string; can
   const [preview, setPreview] = useState<ContractFile | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [upOpen, setUpOpen] = useState(false);
+  const [ndaOpen, setNdaOpen] = useState(false);
   const [pending, setPending] = useState<PendingFile[]>([]);
   const [uploading, setUploading] = useState(false);
   const [confirm, setConfirm] = useState<null | { title: string; desc: string; run: () => Promise<void> }>(null);
@@ -89,6 +91,8 @@ export function ContractDetailView({ id, canEdit, canDelete }: { id: string; can
           <DropdownMenu>
             <DropdownMenuTrigger asChild><Button variant="outline" size="icon"><MoreHorizontal /></Button></DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem onSelect={() => setNdaOpen(true)}><ShieldCheck /> Tạo thỏa thuận bảo mật</DropdownMenuItem>
+              <DropdownMenuSeparator />
               {c.status !== "ACTIVE" && <DropdownMenuItem onSelect={() => setStatus("ACTIVE")}>Đặt lại: Đang hiệu lực</DropdownMenuItem>}
               {c.status !== "DONE" && <DropdownMenuItem onSelect={() => setStatus("DONE")}>Đánh dấu Đã thanh lý</DropdownMenuItem>}
               {c.status !== "CANCEL" && <DropdownMenuItem onSelect={() => setStatus("CANCEL")}>Đánh dấu Huỷ</DropdownMenuItem>}
@@ -183,6 +187,7 @@ export function ContractDetailView({ id, canEdit, canDelete }: { id: string; can
       </div>
 
       <ContractForm open={editOpen} onOpenChange={setEditOpen} contract={c} onSaved={() => load()} />
+      {canEdit && <NdaDialog contract={c} open={ndaOpen} onOpenChange={setNdaOpen} onCreated={() => load()} />}
 
       <Dialog open={upOpen} onOpenChange={setUpOpen}>
         <DialogContent className="sm:max-w-xl">
