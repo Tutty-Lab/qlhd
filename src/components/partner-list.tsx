@@ -2,19 +2,19 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { computeStatus } from "@/lib/constants";
 import { api, fmtDate, fmtCur, sumByCur, noAccent, type ContractRow } from "@/lib/format";
-import { ChevronDown, ChevronRight, Search } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { StatusBadge } from "./status-badge";
+import { useSearch } from "./page-header";
 
 type Partner = { key: string; name: string; tax: string | null; rep: string | null; address: string | null; contracts: ContractRow[]; live: number; value: number; roles: Set<string> };
 
 export function PartnerList() {
   const [rows, setRows] = useState<ContractRow[] | null>(null);
-  const [q, setQ] = useState("");
+  const { q } = useSearch();
   const [open, setOpen] = useState<string | null>(null);
   useEffect(() => { api<ContractRow[]>("/api/contracts").then(setRows).catch(() => setRows([])); }, []);
 
@@ -38,12 +38,6 @@ export function PartnerList() {
   return (
     <div className="space-y-4">
       <Card className="p-0 gap-0 overflow-hidden">
-        <div className="p-4 border-b">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
-            <Input value={q} onChange={(e) => setQ(e.target.value)} className="pl-9 h-9" placeholder="Tìm tên đối tác, MST, người đại diện..." />
-          </div>
-        </div>
         <div className="overflow-x-auto">
           <Table>
             <TableHeader><TableRow>

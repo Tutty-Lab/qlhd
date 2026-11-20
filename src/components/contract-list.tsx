@@ -6,6 +6,7 @@ import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useSearch } from "./page-header";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,7 +16,7 @@ import { StatusBadge } from "./status-badge";
 import { ContractForm } from "./contract-form";
 import { CONTRACT_TYPES, DIRECTIONS, STATUS_LABEL, computeStatus, type StatusKey } from "@/lib/constants";
 import { api, fmtDate, fmtCur, sumByCur, noAccent, type ContractRow } from "@/lib/format";
-import { ArrowDown, ArrowUp, Download, Paperclip, Plus, Search, Filter } from "lucide-react";
+import { ArrowDown, ArrowUp, Download, Paperclip, Plus, Filter } from "lucide-react";
 
 const ALL = "__all";
 type SortKey = "contractNo" | "partner" | "signDate" | "endDate" | "value";
@@ -24,7 +25,7 @@ export function ContractList({ canEdit }: { canEdit: boolean; canDelete: boolean
   const params = useSearchParams();
   const router = useRouter();
   const [rows, setRows] = useState<ContractRow[] | null>(null);
-  const [q, setQ] = useState("");
+  const { q, setQ } = useSearch();
   const [type, setType] = useState(ALL);
   const [direction, setDirection] = useState(ALL);
   const [status, setStatus] = useState(params.get("status") || ALL);
@@ -105,10 +106,7 @@ export function ContractList({ canEdit }: { canEdit: boolean; canDelete: boolean
 
       <Card className="p-0 gap-0 overflow-hidden">
         <div className="p-3 border-b flex flex-wrap gap-2 items-center">
-          <div className="relative flex-1 min-w-[220px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
-            <Input value={q} onChange={(e) => setQ(e.target.value)} className="pl-9 h-9" placeholder="Tìm số HĐ, đối tác, MST, nội dung, tag..." />
-          </div>
+          <div className="flex-1" />
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" className="h-9"><Filter /> Bộ lọc{activeFilters > 0 && <span className="ml-1 rounded-full bg-zinc-900 text-white text-xs px-1.5">{activeFilters}</span>}</Button>

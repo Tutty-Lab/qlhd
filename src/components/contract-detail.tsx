@@ -18,9 +18,9 @@ import { DOC_TYPES, TYPE_FIELDS } from "@/lib/constants";
 import { api, fmtDate, fmtDateTime, fmtMoney, fmtCur, fmtSize, jsonInit, parseExtra, type ContractDetail, type ContractFile } from "@/lib/format";
 import { ArrowLeft, Download, Eye, FileImage, FileText, Loader2, MoreHorizontal, Pencil, ShieldCheck, Trash2, Upload } from "lucide-react";
 import { NdaDialog } from "./nda-dialog";
+import { FilePreview } from "./file-preview";
 
 const ALL = "__all";
-const isPreviewable = (m: string) => m === "application/pdf" || m.startsWith("image/");
 
 export function ContractDetailView({ id, canEdit, canDelete }: { id: string; canEdit: boolean; canDelete: boolean }) {
   const router = useRouter();
@@ -129,7 +129,7 @@ export function ContractDetailView({ id, canEdit, canDelete }: { id: string; can
                     {f.mime.startsWith("image/") ? <FileImage className="size-5" /> : <FileText className="size-5" />}
                   </div>
                   <div className="flex-1 min-w-[140px]">
-                    <button className="truncate text-sm font-medium hover:underline text-left max-w-full block" onClick={() => isPreviewable(f.mime) ? setPreview(f) : window.open(`/api/files/${f.id}?download=1`)}>{f.name}</button>
+                    <button className="truncate text-sm font-medium hover:underline text-left max-w-full block" onClick={() => setPreview(f)}>{f.name}</button>
                     <div className="text-xs text-muted-foreground">{fmtSize(f.size)} · {f.uploadedBy} · {fmtDateTime(f.createdAt)}</div>
                   </div>
                   {canEdit ? (
@@ -138,7 +138,7 @@ export function ContractDetailView({ id, canEdit, canDelete }: { id: string; can
                       <SelectContent>{DOC_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
                     </Select>
                   ) : <span className="text-xs bg-zinc-100 rounded px-2 py-0.5 hidden md:inline">{f.docType}</span>}
-                  {isPreviewable(f.mime) && <Button variant="ghost" size="icon-sm" title="Xem" onClick={() => setPreview(f)}><Eye /></Button>}
+                  <Button variant="ghost" size="icon-sm" title="Xem" onClick={() => setPreview(f)}><Eye /></Button>
                   <Button variant="ghost" size="icon-sm" title="Tải về" asChild><a href={`/api/files/${f.id}?download=1`}><Download /></a></Button>
                   {canDelete && <Button variant="ghost" size="icon-sm" title="Xoá" className="text-destructive" onClick={() => setConfirm({
                     title: "Xoá file?", desc: `File "${f.name}" sẽ bị xoá vĩnh viễn.`,
@@ -200,18 +200,7 @@ export function ContractDetailView({ id, canEdit, canDelete }: { id: string; can
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!preview} onOpenChange={(v) => !v && setPreview(null)}>
-        <DialogContent className="sm:max-w-5xl w-[95vw] h-[90vh] flex flex-col p-3 gap-2">
-          <DialogHeader className="flex-row items-center gap-2 pr-8">
-            <DialogTitle className="truncate text-base flex-1">{preview?.name}</DialogTitle>
-            {preview && <Button variant="outline" size="sm" asChild><a href={`/api/files/${preview.id}?download=1`}><Download /> Tải về</a></Button>}
-          </DialogHeader>
-          {preview && (preview.mime.startsWith("image/")
-            // eslint-disable-next-line @next/next/no-img-element
-            ? <div className="flex-1 min-h-0 flex items-center justify-center bg-zinc-100 rounded"><img src={`/api/files/${preview.id}`} alt={preview.name} className="max-w-full max-h-full object-contain" /></div>
-            : <iframe src={`/api/files/${preview.id}`} className="flex-1 w-full rounded border" title={preview.name} />)}
-        </DialogContent>
-      </Dialog>
+      <FilePreview file={preview} onClose={() => setPreview(null)} />
 
       <AlertDialog open={!!confirm} onOpenChange={(v) => !v && setConfirm(null)}>
         <AlertDialogContent>
