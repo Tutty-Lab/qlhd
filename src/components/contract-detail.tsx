@@ -15,7 +15,7 @@ import { StatusBadge } from "./status-badge";
 import { ContractForm } from "./contract-form";
 import { FileDrop, toFormData, type PendingFile } from "./file-drop";
 import { DOC_TYPES, TYPE_FIELDS } from "@/lib/constants";
-import { api, fmtDate, fmtDateTime, fmtMoney, fmtSize, jsonInit, parseExtra, type ContractDetail, type ContractFile } from "@/lib/format";
+import { api, fmtDate, fmtDateTime, fmtMoney, fmtCur, fmtSize, jsonInit, parseExtra, type ContractDetail, type ContractFile } from "@/lib/format";
 import { ArrowLeft, Download, Eye, FileImage, FileText, Loader2, MoreHorizontal, Pencil, Trash2, Upload } from "lucide-react";
 
 const ALL = "__all";
@@ -66,9 +66,9 @@ export function ContractDetailView({ id, canEdit, canDelete }: { id: string; can
     ["Loại", c.type], ["Chiều", c.direction],
     ["Đối tác", c.partner], ["Mã số thuế", c.partnerTax], ["Người đại diện", c.partnerRep], ["Địa chỉ", c.partnerAddress],
     ["Ngày ký", fmtDate(c.signDate)], ["Hiệu lực", [fmtDate(c.startDate), fmtDate(c.endDate)].filter(Boolean).join(" → ")],
-    ["Giá trị trước VAT", c.value != null ? fmtMoney(c.value) + " đ" : ""],
+    ["Giá trị trước VAT", fmtCur(c.value, c.currency)],
     ["VAT", c.vat != null ? `${c.vat}%` : ""],
-    ["Giá trị sau VAT", c.value != null ? fmtMoney(Math.round(c.value * (1 + (c.vat || 0) / 100))) + " đ" : ""],
+    ["Giá trị sau VAT", c.value != null ? fmtCur(Math.round(c.value * (1 + (c.vat || 0) / 100) * 100) / 100, c.currency) : ""],
     ["Người phụ trách", c.owner],
     ["Tag", c.tags ? <div className="flex flex-wrap gap-1">{c.tags.split(",").map((t) => <span key={t} className="bg-zinc-100 rounded px-1.5 text-xs">{t.trim()}</span>)}</div> : ""],
     ["Ghi chú", c.note ? <span className="whitespace-pre-wrap">{c.note}</span> : ""],

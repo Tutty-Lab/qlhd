@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "./status-badge";
 import { COMPANY, CONTRACT_TYPES, computeStatus } from "@/lib/constants";
-import { api, fmtDate, fmtDateTime, fmtMoney, type ContractRow, type DocumentRow } from "@/lib/format";
+import { api, fmtDate, fmtDateTime, sumByCur, type ContractRow, type DocumentRow } from "@/lib/format";
 import { AlertTriangle, ArrowRight, CheckCircle2, FileStack, FileText, Wallet } from "lucide-react";
 
 const daysLeft = (d: string) => Math.ceil((new Date(d).setHours(23, 59, 59) - Date.now()) / 864e5);
@@ -22,12 +22,11 @@ export function Dashboard() {
   const d = useMemo(() => {
     const list = (rows || []).map((r) => ({ ...r, st: computeStatus(r.status, r.endDate) }));
     const live = list.filter((r) => r.st === "ACTIVE" || r.st === "SOON");
-    const sum = (l: typeof list, dir?: string) => l.filter((r) => !dir || r.direction.startsWith(dir)).reduce((s, r) => s + (r.value || 0), 0);
     return {
       total: list.length, live: live.length,
       soon: list.filter((r) => r.st === "SOON").sort((a, b) => a.endDate!.localeCompare(b.endDate!)),
       expired: list.filter((r) => r.st === "EXPIRED"),
-      sell: sum(live, "Bán"), buy: sum(live, "Mua"),
+      sell: sumByCur(live.filter((r) => r.direction.startsWith("Bán"))), buy: sumByCur(live.filter((r) => r.direction.startsWith("Mua"))),
       byType: CONTRACT_TYPES.map((t) => ({ t, n: list.filter((r) => r.type === t).length })).filter((x) => x.n),
     };
   }, [rows]);
@@ -56,8 +55,8 @@ export function Dashboard() {
         {stat("Hợp đồng đang chạy", d.live, <FileText className="size-4" />, `trên tổng ${d.total} hợp đồng`, "/contracts")}
         {stat("Sắp hết hạn (30 ngày)", <span className={d.soon.length ? "text-amber-600" : ""}>{d.soon.length}</span>, <AlertTriangle className="size-4" />,
           `${d.expired.length} hợp đồng đã hết hạn`, "/contracts?status=EXPIRED")}
-        {stat("Giá trị bán ra đang chạy", fmtMoney(d.sell), <Wallet className="size-4" />, "đồng, trước VAT")}
-        {stat("Giá trị mua vào đang chạy", fmtMoney(d.buy), <Wallet className="size-4" />, "đồng, trước VAT")}
+        {stat("Giá trị bán ra đang chạy", <span className="text-xl">{d.sell}</span>, <Wallet className="size-4" />, "trước VAT, không quy đổi tiền tệ")}
+        {stat("Giá trị mua vào đang chạy", <span className="text-xl">{d.buy}</span>, <Wallet className="size-4" />, "trước VAT, không quy đổi tiền tệ")}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_380px]">

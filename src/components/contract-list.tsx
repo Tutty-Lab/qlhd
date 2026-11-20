@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { StatusBadge } from "./status-badge";
 import { ContractForm } from "./contract-form";
 import { CONTRACT_TYPES, DIRECTIONS, STATUS_LABEL, computeStatus, type StatusKey } from "@/lib/constants";
-import { api, fmtDate, fmtMoney, noAccent, type ContractRow } from "@/lib/format";
+import { api, fmtDate, fmtMoney, fmtCur, sumByCur, noAccent, type ContractRow } from "@/lib/format";
 import { ArrowDown, ArrowUp, Download, Paperclip, Plus, Search } from "lucide-react";
 
 const ALL = "__all";
@@ -59,13 +59,13 @@ export function ContractList({ canEdit }: { canEdit: boolean; canDelete: boolean
       { label: "Đã thanh lý", value: c("DONE"), s: "DONE" },
     ];
   }, [withStatus]);
-  const total = filtered.reduce((s, r) => s + (r.value || 0), 0);
+  const total = sumByCur(filtered);
 
   function exportXlsx() {
     const data = filtered.map((r) => ({
       "Số HĐ": r.contractNo, "Nội dung": r.title || "", "Loại": r.type, "Chiều": r.direction,
       "Đối tác": r.partner, "MST": r.partnerTax || "", "Ngày ký": fmtDate(r.signDate), "Hiệu lực": fmtDate(r.startDate),
-      "Hết hạn": fmtDate(r.endDate), "Giá trị (trước VAT)": r.value ?? "", "VAT %": r.vat ?? "", "Phụ trách": r.owner || "",
+      "Hết hạn": fmtDate(r.endDate), "Giá trị (trước VAT)": r.value ?? "", "Tiền tệ": r.currency || "VND", "VAT %": r.vat ?? "", "Phụ trách": r.owner || "",
       "Trạng thái": STATUS_LABEL[r.st], "Số file": r._count?.files ?? 0, "Ghi chú": r.note || "",
     }));
     const ws = XLSX.utils.json_to_sheet(data);
@@ -158,7 +158,7 @@ export function ContractList({ canEdit }: { canEdit: boolean; canDelete: boolean
                   <TableCell><div>{r.type}</div><div className="text-xs text-muted-foreground">{r.direction}</div></TableCell>
                   <TableCell>{fmtDate(r.signDate)}</TableCell>
                   <TableCell>{fmtDate(r.endDate)}</TableCell>
-                  <TableCell className="text-right tabular-nums">{fmtMoney(r.value)}</TableCell>
+                  <TableCell className="text-right tabular-nums">{fmtCur(r.value, r.currency)}</TableCell>
                   <TableCell className="text-center"><span className="inline-flex items-center gap-1 text-muted-foreground"><Paperclip className="size-3.5" />{r._count?.files ?? 0}</span></TableCell>
                   <TableCell><StatusBadge status={r.status} endDate={r.endDate} /></TableCell>
                 </TableRow>
@@ -167,7 +167,7 @@ export function ContractList({ canEdit }: { canEdit: boolean; canDelete: boolean
           </Table>
         </div>
         <div className="px-4 py-3 border-t text-sm flex justify-between text-muted-foreground">
-          <span>{filtered.length} hợp đồng</span><span>Tổng giá trị: <b className="text-foreground">{fmtMoney(total)} đ</b></span>
+          <span>{filtered.length} hợp đồng</span><span>Tổng giá trị: <b className="text-foreground">{total}</b></span>
         </div>
       </Card>
 

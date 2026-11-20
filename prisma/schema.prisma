@@ -32,6 +32,7 @@ model Contract {
   startDate      DateTime?
   endDate        DateTime?
   value          Float?
+  currency       String         @default("VND")
   vat            Float?
   owner          String?
   note           String?

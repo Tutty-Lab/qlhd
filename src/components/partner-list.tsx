@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { computeStatus } from "@/lib/constants";
-import { api, fmtDate, fmtMoney, noAccent, type ContractRow } from "@/lib/format";
+import { api, fmtDate, fmtCur, sumByCur, noAccent, type ContractRow } from "@/lib/format";
 import { ChevronDown, ChevronRight, Search } from "lucide-react";
 import { StatusBadge } from "./status-badge";
 
@@ -24,7 +24,7 @@ export function PartnerList() {
       const key = r.partnerTax?.trim() || noAccent(r.partner.trim());
       const p = map.get(key) ?? { key, name: r.partner, tax: r.partnerTax, rep: r.partnerRep, address: r.partnerAddress, contracts: [], live: 0, value: 0, roles: new Set<string>() };
       p.contracts.push(r);
-      p.value += r.value || 0;
+      if ((r.currency || "VND") === "VND") p.value += r.value || 0;
       p.roles.add(r.direction.startsWith("Bán") ? "Khách hàng" : r.direction.startsWith("Mua") ? "Nhà cung cấp" : "Đối tác");
       const st = computeStatus(r.status, r.endDate);
       if (st === "ACTIVE" || st === "SOON") p.live++;
@@ -82,7 +82,7 @@ function PartnerRows({ p, open, toggle }: { p: Partner; open: boolean; toggle: (
         <TableCell>{p.rep}</TableCell>
         <TableCell className="text-right tabular-nums">{p.contracts.length}</TableCell>
         <TableCell className="text-right tabular-nums">{p.live}</TableCell>
-        <TableCell className="text-right tabular-nums">{fmtMoney(p.value)}</TableCell>
+        <TableCell className="text-right tabular-nums">{sumByCur(p.contracts)}</TableCell>
       </TableRow>
       {open && p.contracts.map((c) => (
         <TableRow key={c.id} className="bg-zinc-50/70 hover:bg-zinc-100/70">
@@ -93,7 +93,7 @@ function PartnerRows({ p, open, toggle }: { p: Partner; open: boolean; toggle: (
           </TableCell>
           <TableCell className="text-sm">{fmtDate(c.signDate)} → {fmtDate(c.endDate)}</TableCell>
           <TableCell colSpan={2} className="text-right"><StatusBadge status={c.status} endDate={c.endDate} /></TableCell>
-          <TableCell className="text-right tabular-nums">{fmtMoney(c.value)}</TableCell>
+          <TableCell className="text-right tabular-nums">{fmtCur(c.value, c.currency)}</TableCell>
         </TableRow>
       ))}
     </>

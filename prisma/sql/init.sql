@@ -29,6 +29,7 @@ CREATE TABLE "Contract" (
     "startDate" TIMESTAMP(3),
     "endDate" TIMESTAMP(3),
     "value" DOUBLE PRECISION,
+    "currency" TEXT NOT NULL DEFAULT 'VND',
     "vat" DOUBLE PRECISION,
     "owner" TEXT,
     "note" TEXT,

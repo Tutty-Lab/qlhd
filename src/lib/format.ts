@@ -1,4 +1,14 @@
 export const fmtMoney = (v?: number | null) => (v == null ? "" : new Intl.NumberFormat("vi-VN").format(v));
+export const CURRENCIES = ["VND", "EUR", "USD"];
+export const curUnit = (c?: string | null) => (!c || c === "VND" ? "đ" : c);
+export const fmtCur = (v?: number | null, c?: string | null) => (v == null ? "" : `${fmtMoney(v)} ${curUnit(c)}`);
+// Cộng giá trị theo từng loại tiền, không quy đổi: "48.400.000 đ · 3.850 EUR"
+export const sumByCur = (rows: { value: number | null; currency?: string | null }[]) => {
+  const m = new Map<string, number>();
+  for (const r of rows) if (r.value != null) m.set(r.currency || "VND", (m.get(r.currency || "VND") || 0) + r.value);
+  if (!m.size) return "0 đ";
+  return [...m].sort(([a], [b]) => (a === "VND" ? -1 : b === "VND" ? 1 : a.localeCompare(b))).map(([c, v]) => fmtCur(v, c)).join(" · ");
+};
 export const fmtDate = (v?: string | Date | null) => (v ? new Date(v).toLocaleDateString("vi-VN", { timeZone: "UTC" }) : "");
 export const fmtDateTime = (v?: string | Date | null) => (v ? new Date(v).toLocaleString("vi-VN") : "");
 // Ngày được lưu ở 00:00 UTC (form gửi "YYYY-MM-DD") → đọc lại theo UTC để không lệch ngày
@@ -21,7 +31,7 @@ export const jsonInit = (method: string, body: unknown): RequestInit => ({
 export type ContractRow = {
   id: string; company: string; contractNo: string; title: string | null; type: string; direction: string;
   partner: string; partnerTax: string | null; partnerRep: string | null; partnerAddress: string | null;
-  signDate: string | null; startDate: string | null; endDate: string | null; value: number | null; vat: number | null;
+  signDate: string | null; startDate: string | null; endDate: string | null; value: number | null; currency: string; vat: number | null;
   owner: string | null; note: string | null; tags: string | null; extra: string | null; status: string; createdBy: string; createdAt: string;
   _count?: { files: number };
 };

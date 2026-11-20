@@ -10,13 +10,13 @@ import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetT
 import { Separator } from "@/components/ui/separator";
 import { FileDrop, toFormData, type PendingFile } from "./file-drop";
 import { CONTRACT_TYPES, DIRECTIONS, TYPE_FIELDS, type ExtraField } from "@/lib/constants";
-import { api, fmtMoney, jsonInit, parseExtra, toInputDate, type ContractRow } from "@/lib/format";
+import { api, CURRENCIES, fmtMoney, jsonInit, parseExtra, toInputDate, type ContractRow } from "@/lib/format";
 import { Loader2 } from "lucide-react";
 
 type Form = Record<string, string>;
 const empty = (): Form => ({
   contractNo: "", title: "", type: CONTRACT_TYPES[0], direction: DIRECTIONS[0], partner: "", partnerTax: "",
-  partnerRep: "", partnerAddress: "", signDate: "", startDate: "", endDate: "", value: "", vat: "", owner: "", note: "", tags: "",
+  partnerRep: "", partnerAddress: "", signDate: "", startDate: "", endDate: "", value: "", currency: "VND", vat: "", owner: "", note: "", tags: "",
 });
 const fromRow = (c: ContractRow): Form => ({
   ...empty(),
@@ -105,10 +105,16 @@ export function ContractForm({ open, onOpenChange, contract, onSaved }: {
             {field("signDate", "Ngày ký", { type: "date" })}
             {field("startDate", "Ngày hiệu lực", { type: "date" })}
             {field("endDate", "Ngày hết hạn", { type: "date" })}
-            <div className="sm:col-span-2">{field("value", "Giá trị trước VAT (VNĐ)", {
-              inputMode: "numeric", value: f.value ? fmtMoney(Number(digits(f.value))) : "",
-              onChange: (e) => setF({ ...f, value: digits(e.target.value) }),
-            })}</div>
+            <div className="sm:col-span-2 flex gap-2 items-end">
+              <div className="flex-1">{field("value", `Giá trị trước VAT (${f.currency === "VND" ? "VNĐ" : f.currency})`, {
+                inputMode: "numeric", value: f.value ? fmtMoney(Number(digits(f.value))) : "",
+                onChange: (e) => setF({ ...f, value: digits(e.target.value) }),
+              })}</div>
+              <Select value={f.currency} onValueChange={(v) => setF({ ...f, currency: v })}>
+                <SelectTrigger className="w-24" aria-label="Tiền tệ"><SelectValue /></SelectTrigger>
+                <SelectContent>{CURRENCIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
             {field("vat", "VAT (%)", { type: "number", min: 0, max: 100, placeholder: "8 / 10" })}
           </section>
           {typeFields.length > 0 && (<>

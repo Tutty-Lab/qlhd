@@ -23,7 +23,8 @@ export const contractSchema = z.object({
   partner: z.string().trim().min(1, "Thiếu tên đối tác").max(300),
   partnerTax: optStr, partnerRep: optStr, partnerAddress: optStr,
   signDate: optDate, startDate: optDate, endDate: optDate,
-  value: optNum, vat: optNum, owner: optStr, note: optStr, tags: optStr,
+  value: optNum, vat: optNum,
+  currency: z.enum(["VND", "EUR", "USD"]).optional().default("VND"), owner: optStr, note: optStr, tags: optStr,
 }).refine((d) => !d.startDate || !d.endDate || d.endDate >= d.startDate,
   { message: "Ngày hết hạn phải sau ngày hiệu lực", path: ["endDate"] });
 
