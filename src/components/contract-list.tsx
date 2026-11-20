@@ -57,9 +57,7 @@ export function ContractList({ canEdit }: { canEdit: boolean; canDelete: boolean
     return [
       { label: "Tổng hợp đồng", value: withStatus.length, s: ALL },
       { label: "Đang hiệu lực", value: c("ACTIVE"), s: "ACTIVE" },
-      { label: "Sắp hết hạn (30 ngày)", value: c("SOON"), s: "SOON", warn: true },
-      { label: "Hết hạn", value: c("EXPIRED"), s: "EXPIRED" },
-      { label: "Đã thanh lý", value: c("DONE"), s: "DONE" },
+      { label: "Sắp hết hạn", value: c("SOON"), s: "SOON", warn: true },
     ];
   }, [withStatus]);
   const total = sumByCur(filtered);
@@ -93,7 +91,7 @@ export function ContractList({ canEdit }: { canEdit: boolean; canDelete: boolean
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         {stats.map((s) => (
           <button key={s.label} onClick={() => setStatus(s.s)} className="text-left">
             <Card className={`p-4 gap-1 transition-shadow hover:shadow-md ${status === s.s ? "ring-2 ring-zinc-900" : ""}`}>
