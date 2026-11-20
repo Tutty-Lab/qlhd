@@ -80,3 +80,17 @@ export function computeStatus(status: string, endDate?: string | Date | null): S
   return "ACTIVE";
 }
 export const ROLE_LABEL: Record<string, string> = { admin: "Quản trị", editor: "Nhập liệu", viewer: "Chỉ xem" };
+
+// Đánh số hợp đồng: một dãy số chung cho mọi loại HĐ trong năm, reset mỗi năm.
+// Dạng: 09/2026/HĐDV/TUTTYLAB  (số thứ tự 2 chữ số / năm / mã loại / công ty)
+export const TYPE_CODE: Record<string, string> = {
+  "Hợp đồng dịch vụ": "HĐDV", "Hợp đồng mua bán": "HĐMB", "Hợp đồng thuê": "HĐTH", "Hợp đồng lao động": "HĐLĐ",
+  "Hợp đồng hợp tác": "HĐHT", "Hợp đồng nguyên tắc": "HĐNT", "Khác": "HĐ",
+};
+export const formatContractNo = (seq: number, year: number, type: string) =>
+  `${String(seq).padStart(2, "0")}/${year}/${TYPE_CODE[type] || "HĐ"}/${COMPANY.code}`;
+// Lấy số thứ tự từ số HĐ đã có, chấp nhận cả dạng cũ "4/2026/HĐDV-TUTTYLAB"
+export const parseContractSeq = (no: string) => {
+  const m = no.trim().match(/^0*(\d+)\/(\d{4})\//);
+  return m ? { seq: Number(m[1]), year: Number(m[2]) } : null;
+};

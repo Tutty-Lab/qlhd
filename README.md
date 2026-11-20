@@ -80,3 +80,10 @@ Sửa trong `src/lib/constants.ts`:
 
 ## Giai đoạn 2 (chưa làm)
 Soạn hợp đồng / biên bản nghiệm thu từ template, đợt thanh toán, đánh số tự động, in A4.
+
+## Đánh số hợp đồng
+- Một dãy số **chung cho mọi loại hợp đồng** trong năm, bắt đầu lại từ 01 mỗi năm.
+- Dạng: `09/2026/HĐDV/TUTTYLAB` = số thứ tự (2 chữ số) / năm / mã loại / công ty.
+- Mã loại: HĐDV dịch vụ, HĐMB mua bán, HĐTH thuê, HĐLĐ lao động, HĐHT hợp tác, HĐNT nguyên tắc (sửa ở `TYPE_CODE` trong `src/lib/constants.ts`).
+- Form "Thêm hợp đồng" tự điền số tiếp theo (`/api/contracts/next-no`), đọc được cả số cũ dạng `4/2026/HĐDV-TUTTYLAB`.
+- Hợp đồng đã ký giữ nguyên số in trên bản ký.

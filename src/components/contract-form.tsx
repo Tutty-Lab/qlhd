@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { FileDrop, toFormData, type PendingFile } from "./file-drop";
-import { CONTRACT_TYPES, DIRECTIONS, TYPE_FIELDS, type ExtraField } from "@/lib/constants";
+import { CONTRACT_TYPES, DIRECTIONS, TYPE_FIELDS, type ExtraField, formatContractNo } from "@/lib/constants";
 import { api, CURRENCIES, fmtMoney, jsonInit, parseExtra, toInputDate, type ContractRow } from "@/lib/format";
 import { Loader2 } from "lucide-react";
 
@@ -34,14 +34,27 @@ export function ContractForm({ open, onOpenChange, contract, onSaved }: {
   const [files, setFiles] = useState<PendingFile[]>([]);
   const [saving, setSaving] = useState(false);
   const [prevOpen, setPrevOpen] = useState(false);
+  const [seq, setSeq] = useState<{ year: number; next: number } | null>(null);
   if (open !== prevOpen) {
     setPrevOpen(open);
-    if (open) { setF(contract ? fromRow(contract) : empty()); setExtra(parseExtra(contract?.extra)); setFiles([]); }
+    if (open) { setF(contract ? fromRow(contract) : empty()); setExtra(parseExtra(contract?.extra)); setFiles([]); setSeq(null); }
   }
+  // HĐ mới: gợi ý số tiếp theo (dãy chung trong năm), đổi loại HĐ thì đổi mã loại nếu người dùng chưa sửa số
+  useEffect(() => {
+    if (!open || editing) return;
+    api<{ year: number; next: number }>("/api/contracts/next-no").then((r) => {
+      setSeq(r);
+      setF((cur) => (cur.contractNo ? cur : { ...cur, contractNo: formatContractNo(r.next, r.year, cur.type) }));
+    }).catch(() => {});
+  }, [open, editing]);
+  const autoNo = seq ? formatContractNo(seq.next, seq.year, f.type) : "";
 
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value });
   const sel = (k: string, opts: string[]) => (
-    <Select value={f[k]} onValueChange={(v) => setF({ ...f, [k]: v })}>
+    <Select value={f[k]} onValueChange={(v) => setF({
+      ...f, [k]: v,
+      ...(k === "type" && seq && f.contractNo === formatContractNo(seq.next, seq.year, f.type) ? { contractNo: formatContractNo(seq.next, seq.year, v) } : {}),
+    })}>
       <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
       <SelectContent>{opts.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
     </Select>
@@ -87,7 +100,15 @@ export function ContractForm({ open, onOpenChange, contract, onSaved }: {
         </SheetHeader>
         <div className="px-4 space-y-5 pb-4">
           <section className="grid sm:grid-cols-2 gap-3">
-            {field("contractNo", "Số hợp đồng", { placeholder: "VD: 015/2026/HĐDV-TTL" }, true)}
+            <div className="space-y-1">
+              {field("contractNo", "Số hợp đồng", { placeholder: "VD: 09/2026/HĐDV/TUTTYLAB" }, true)}
+              {!editing && seq && (
+                <p className="text-xs text-muted-foreground">
+                  Số tiếp theo năm {seq.year}: <b>{String(seq.next).padStart(2, "0")}</b> (dãy chung mọi loại HĐ).
+                  {f.contractNo !== autoNo && <button type="button" className="ml-1 underline" onClick={() => setF({ ...f, contractNo: autoNo })}>Dùng {autoNo}</button>}
+                </p>
+              )}
+            </div>
             <div className="space-y-1.5"><Label>Loại hợp đồng</Label>{sel("type", CONTRACT_TYPES)}</div>
             <div className="sm:col-span-2">{field("title", "Tên / nội dung hợp đồng", { placeholder: "VD: Dịch vụ quảng cáo Facebook Q1/2026" })}</div>
             <div className="space-y-1.5"><Label>Chiều hợp đồng</Label>{sel("direction", DIRECTIONS)}</div>
