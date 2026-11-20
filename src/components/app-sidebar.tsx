@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { COMPANY, DOC_TYPES, ROLE_LABEL } from "@/lib/constants";
 import { api, jsonInit } from "@/lib/format";
-import { Building2, ChevronsUpDown, ClipboardCheck, FileStack, FileText, KeyRound, LayoutDashboard, LogOut, Plus, Users } from "lucide-react";
+import { Building2, ChevronsUpDown, ClipboardCheck, FileStack, FileText, KeyRound, LayoutDashboard, LogOut, Plus, ShieldCheck, Users } from "lucide-react";
 
 const NAV = [
   { href: "/", label: "Tổng quan", icon: LayoutDashboard },
@@ -86,6 +86,11 @@ export function AppSidebar({ name, role, canEdit }: { name: string; role: string
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip={DOC_TYPES[2]}>
                   <Link href={`/documents?type=${encodeURIComponent(DOC_TYPES[2])}`}><ClipboardCheck /><span>Biên bản nghiệm thu</span></Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Thỏa thuận bảo mật thông tin">
+                  <Link href={`/documents?type=${encodeURIComponent("Thỏa thuận bảo mật")}`}><ShieldCheck /><span>Thỏa thuận bảo mật</span></Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

@@ -53,7 +53,7 @@ export const TYPE_FIELDS: Record<string, ExtraField[]> = {
 };
 
 export const DIRECTIONS = ["Bán ra (khách hàng)", "Mua vào (nhà cung cấp)", "Nội bộ"];
-export const DOC_TYPES = ["Hợp đồng gốc", "Phụ lục", "Biên bản nghiệm thu", "Biên bản thanh lý", "Hóa đơn", "Khác"];
+export const DOC_TYPES = ["Hợp đồng gốc", "Phụ lục", "Biên bản nghiệm thu", "Biên bản thanh lý", "Hóa đơn", "Thỏa thuận bảo mật", "Khác"];
 export const EXPIRING_DAYS = 30;
 
 export type StatusKey = "ACTIVE" | "SOON" | "EXPIRED" | "DONE" | "CANCEL";
