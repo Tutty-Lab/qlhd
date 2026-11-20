@@ -5,7 +5,7 @@ import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle }
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "./status-badge";
-import { COMPANY, CONTRACT_TYPES, computeStatus } from "@/lib/constants";
+import { CONTRACT_TYPES, computeStatus } from "@/lib/constants";
 import { api, fmtDate, fmtDateTime, sumByCur, type ContractRow, type DocumentRow } from "@/lib/format";
 import { AlertTriangle, ArrowRight, CheckCircle2, FileStack, FileText, Wallet } from "lucide-react";
 
@@ -46,10 +46,6 @@ export function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Tổng quan</h1>
-        <p className="text-sm text-muted-foreground">{COMPANY.name}</p>
-      </div>
 
       <div className="grid gap-4 grid-cols-2 xl:grid-cols-4">
         {stat("Hợp đồng đang chạy", d.live, <FileText className="size-4" />, `trên tổng ${d.total} hợp đồng`, "/contracts")}
@@ -103,7 +99,7 @@ export function Dashboard() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Tài liệu mới tải lên</CardTitle><CardDescription>Hợp đồng, phụ lục, biên bản nghiệm thu gần đây</CardDescription>
+          <CardTitle>Tài liệu mới tải lên</CardTitle>
           <CardAction><Button variant="outline" size="sm" asChild><Link href="/documents">Tất cả tài liệu <ArrowRight /></Link></Button></CardAction>
         </CardHeader>
         <CardContent>

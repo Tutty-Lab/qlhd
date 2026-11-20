@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,8 +14,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { StatusBadge } from "./status-badge";
 import { ContractForm } from "./contract-form";
 import { CONTRACT_TYPES, DIRECTIONS, STATUS_LABEL, computeStatus, type StatusKey } from "@/lib/constants";
-import { api, fmtDate, fmtMoney, fmtCur, sumByCur, noAccent, type ContractRow } from "@/lib/format";
-import { ArrowDown, ArrowUp, Download, Paperclip, Plus, Search } from "lucide-react";
+import { api, fmtDate, fmtCur, sumByCur, noAccent, type ContractRow } from "@/lib/format";
+import { ArrowDown, ArrowUp, Download, Paperclip, Plus, Search, Filter } from "lucide-react";
 
 const ALL = "__all";
 type SortKey = "contractNo" | "partner" | "signDate" | "endDate" | "value";
@@ -72,6 +74,7 @@ export function ContractList({ canEdit }: { canEdit: boolean; canDelete: boolean
     const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Hợp đồng");
     XLSX.writeFile(wb, `hop-dong-${new Date().toISOString().slice(0, 10)}.xlsx`);
   }
+  const activeFilters = [type, direction, status].filter((v) => v !== ALL).length + (from || to ? 1 : 0);
   const reset = () => { setQ(""); setType(ALL); setDirection(ALL); setStatus(ALL); setFrom(""); setTo(""); };
   const sortHead = (k: SortKey, label: string, right = false) => (
     <TableHead className={right ? "text-right" : ""}>
@@ -82,7 +85,7 @@ export function ContractList({ canEdit }: { canEdit: boolean; canDelete: boolean
   );
   const filterSel = (v: string, set: (v: string) => void, all: string, opts: [string, string][]) => (
     <Select value={v} onValueChange={set}>
-      <SelectTrigger size="sm" className="bg-white"><SelectValue /></SelectTrigger>
+      <SelectTrigger size="sm" className="bg-white w-full"><SelectValue /></SelectTrigger>
       <SelectContent><SelectItem value={ALL}>{all}</SelectItem>{opts.map(([k, l]) => <SelectItem key={k} value={k}>{l}</SelectItem>)}</SelectContent>
     </Select>
   );
@@ -101,27 +104,30 @@ export function ContractList({ canEdit }: { canEdit: boolean; canDelete: boolean
       </div>
 
       <Card className="p-0 gap-0 overflow-hidden">
-        <div className="p-4 space-y-3 border-b">
-          <div className="flex flex-wrap gap-2 items-center">
-            <div className="relative flex-1 min-w-[220px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
-              <Input value={q} onChange={(e) => setQ(e.target.value)} className="pl-9 h-9" placeholder="Tìm số HĐ, đối tác, MST, nội dung, tag..." />
-            </div>
-            <Button variant="outline" className="h-9" onClick={exportXlsx} disabled={!filtered.length}><Download /> Xuất Excel</Button>
-            {canEdit && <Button className="h-9" onClick={() => setFormOpen(true)}><Plus /> Thêm hợp đồng</Button>}
+        <div className="p-3 border-b flex flex-wrap gap-2 items-center">
+          <div className="relative flex-1 min-w-[220px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
+            <Input value={q} onChange={(e) => setQ(e.target.value)} className="pl-9 h-9" placeholder="Tìm số HĐ, đối tác, MST, nội dung, tag..." />
           </div>
-          <div className="flex flex-wrap gap-2 items-center text-sm">
-            {filterSel(type, setType, "Tất cả loại", CONTRACT_TYPES.map((t) => [t, t]))}
-            {filterSel(direction, setDirection, "Tất cả chiều", DIRECTIONS.map((t) => [t, t]))}
-            {filterSel(status, setStatus, "Tất cả trạng thái", Object.entries(STATUS_LABEL))}
-            <div className="flex items-center border rounded-md bg-white h-7 px-1">
-              <span className="px-2 text-muted-foreground">Ngày ký</span>
-              <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="bg-transparent outline-none px-1" />
-              <span className="text-zinc-400 px-1">–</span>
-              <input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="bg-transparent outline-none px-1" />
-            </div>
-            <Button variant="link" size="sm" onClick={reset} className="text-muted-foreground">Xoá lọc</Button>
-          </div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="h-9"><Filter /> Bộ lọc{activeFilters > 0 && <span className="ml-1 rounded-full bg-zinc-900 text-white text-xs px-1.5">{activeFilters}</span>}</Button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-72 space-y-3">
+              <div className="space-y-1.5"><Label className="text-xs text-muted-foreground">Loại hợp đồng</Label>{filterSel(type, setType, "Tất cả loại", CONTRACT_TYPES.map((t) => [t, t]))}</div>
+              <div className="space-y-1.5"><Label className="text-xs text-muted-foreground">Chiều</Label>{filterSel(direction, setDirection, "Tất cả chiều", DIRECTIONS.map((t) => [t, t]))}</div>
+              <div className="space-y-1.5"><Label className="text-xs text-muted-foreground">Trạng thái</Label>{filterSel(status, setStatus, "Tất cả trạng thái", Object.entries(STATUS_LABEL))}</div>
+              <div className="space-y-1.5"><Label className="text-xs text-muted-foreground">Ngày ký</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="h-8 text-xs" aria-label="Từ ngày" />
+                  <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="h-8 text-xs" aria-label="Đến ngày" />
+                </div>
+              </div>
+              <Button variant="ghost" size="sm" className="w-full" onClick={reset} disabled={!activeFilters && !q}>Xoá lọc</Button>
+            </PopoverContent>
+          </Popover>
+          <Button variant="outline" className="h-9" onClick={exportXlsx} disabled={!filtered.length}><Download /> Xuất Excel</Button>
+          {canEdit && <Button className="h-9" onClick={() => setFormOpen(true)}><Plus /> Thêm hợp đồng</Button>}
         </div>
 
         <div className="overflow-x-auto">

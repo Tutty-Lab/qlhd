@@ -37,10 +37,6 @@ export function PartnerList() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Đối tác</h1>
-        <p className="text-sm text-muted-foreground">Tổng hợp từ thông tin đối tác trong các hợp đồng (gộp theo mã số thuế)</p>
-      </div>
       <Card className="p-0 gap-0 overflow-hidden">
         <div className="p-4 border-b">
           <div className="relative">

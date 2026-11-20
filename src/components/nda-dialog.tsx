@@ -6,12 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { api, fmtMoney, jsonInit, type ContractDetail, type ContractFile } from "@/lib/format";
+import { api, fmtMoney, jsonInit, type ContractFile, type ContractRow } from "@/lib/format";
 import { Loader2 } from "lucide-react";
 
 // Tạo file Thỏa thuận bảo mật (.docx) từ thông tin hợp đồng
 export function NdaDialog({ contract: c, open, onOpenChange, onCreated }: {
-  contract: ContractDetail; open: boolean; onOpenChange: (v: boolean) => void; onCreated: (f: ContractFile) => void;
+  contract: ContractRow; open: boolean; onOpenChange: (v: boolean) => void; onCreated: (f: ContractFile) => void;
 }) {
   const [f, setF] = useState({ number: "", purpose: "", years: "2", penalty: "" });
   const [busy, setBusy] = useState(false);

@@ -6,24 +6,27 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { NdaCreateButton } from "./nda-create-button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DOC_TYPES } from "@/lib/constants";
 import { api, fmtDateTime, fmtSize, type DocumentRow } from "@/lib/format";
-import { Download, Eye, FileImage, FileText, Search } from "lucide-react";
+import { Download, Eye, FileImage, FileText, Filter, Search } from "lucide-react";
 
 const ALL = "__all";
 const PAGE = 50;
+const NDA = "Thỏa thuận bảo mật";
 type DocumentPage = { items: DocumentRow[]; total: number; counts: Record<string, number>; all: number; loading?: boolean };
 const EMPTY: DocumentPage = { items: [], total: 0, counts: {}, all: 0 };
 
-export function DocumentList() {
+export function DocumentList({ canEdit }: { canEdit: boolean }) {
   const params = useSearchParams();
   const [res, setRes] = useState<DocumentPage | null>(null);
   const [tab, setTab] = useState(params.get("type") || ALL);
   const [q, setQ] = useState("");
   const [dq, setDq] = useState("");
   const [page, setPage] = useState(1);
+  const [tick, setTick] = useState(0);
   useEffect(() => { setTab(params.get("type") || ALL); setPage(1); }, [params]);
   useEffect(() => { const t = setTimeout(() => { setDq(q.trim()); setPage(1); }, 300); return () => clearTimeout(t); }, [q]);
   useEffect(() => {
@@ -34,7 +37,7 @@ export function DocumentList() {
     setRes((r) => (r ? { ...r, loading: true } : r));
     api<DocumentPage>("/api/documents?" + sp, { signal: ctl.signal }).then(setRes).catch((e) => { if (e?.name !== "AbortError") setRes(EMPTY); });
     return () => ctl.abort();
-  }, [tab, dq, page]);
+  }, [tab, dq, page, tick]);
 
   const list = res?.items || [];
   const pages = res ? Math.max(1, Math.ceil(res.total / PAGE)) : 1;
@@ -42,24 +45,20 @@ export function DocumentList() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Tài liệu</h1>
-        <p className="text-sm text-muted-foreground">Toàn bộ file đã tải lên của mọi hợp đồng</p>
-      </div>
       <Card className="p-0 gap-0 overflow-hidden">
-        <div className="p-4 border-b space-y-3">
-          <div className="relative">
+        <div className="p-3 border-b flex flex-wrap gap-2 items-center">
+          <div className="relative flex-1 min-w-[220px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
             <Input value={q} onChange={(e) => setQ(e.target.value)} className="pl-9 h-9" placeholder="Tìm tên file, số hợp đồng, đối tác..." />
           </div>
-          <div className="overflow-x-auto">
-            <Tabs value={tab} onValueChange={(v) => { setTab(v); setPage(1); }}>
-              <TabsList>
-                <TabsTrigger value={ALL}>Tất cả ({res?.all ?? 0})</TabsTrigger>
-                {DOC_TYPES.map((t) => <TabsTrigger key={t} value={t}>{t} ({count(t)})</TabsTrigger>)}
-              </TabsList>
-            </Tabs>
-          </div>
+          <Select value={tab} onValueChange={(v) => { setTab(v); setPage(1); }}>
+            <SelectTrigger className="h-9 w-[230px] bg-white"><Filter className="size-4 text-muted-foreground" /><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL}>Tất cả loại ({res?.all ?? 0})</SelectItem>
+              {DOC_TYPES.map((t) => <SelectItem key={t} value={t}>{t} ({count(t)})</SelectItem>)}
+            </SelectContent>
+          </Select>
+          {canEdit && tab === NDA && <NdaCreateButton onCreated={() => setTick((t) => t + 1)} />}
         </div>
         <div className="overflow-x-auto">
           <Table>

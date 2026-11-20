@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import {
   Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader,
-  SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail,
+  SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -45,8 +45,8 @@ export function AppSidebar({ name, role, canEdit }: { name: string; role: string
     <Sidebar collapsible="icon">
       <SidebarHeader>
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
+          <SidebarMenuItem className="flex items-center gap-1 group-data-[collapsible=icon]:justify-center">
+            <SidebarMenuButton size="lg" asChild className="flex-1 group-data-[collapsible=icon]:hidden">
               <Link href="/">
                 <div className="bg-sidebar-primary text-sidebar-primary-foreground flex size-8 items-center justify-center rounded-lg"><Building2 className="size-4" /></div>
                 <div className="grid flex-1 text-left leading-tight">
@@ -55,6 +55,7 @@ export function AppSidebar({ name, role, canEdit }: { name: string; role: string
                 </div>
               </Link>
             </SidebarMenuButton>
+            <SidebarTrigger className="shrink-0 text-muted-foreground" title="Ẩn / hiện sidebar (Ctrl+B)" />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
